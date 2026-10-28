@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 # MCP Server instance
 mcp = FastMCP("Videogames Store")
 
-DB_PATH = "C:\\Users\\hsrx4\\Cursos\\Curso_MCP\\seccion_3\\tienda_videojuegos.db"
+DB_PATH = "D:\\Documents\\Curso_MCP\\seccion_3\\tienda_videojuegos.db"
 
 def conectar_bd():
     """Conecta a la base de datos SQLite"""
@@ -126,4 +126,5 @@ def ejecutar_consulta(sql: str) -> List[Dict[str, Any]]:
 
 # Start point
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run() # STDIO
+    # mcp.run(transport="http", host="127.0.0.1", port=8080, path="/mcp") # HTTP
