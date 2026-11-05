@@ -6,14 +6,36 @@ import os
 load_dotenv()
 
 class GmailMCPClient:
-    def __init__(self):
-        self.ollama_model = os.getenv("OLLAMA_MODEL", "qwen3:8b")
+    def __init__(self, user_id: str = "gmail-client"):
+        self.user_id = user_id
+        self.ollama_model = os.getenv("OLLAMA_MODEL", "qwen3.5:4b")
         self.ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-        self.mcp_server_path = "D:\\Documents\\Curso_MCP\\seccion_7\\gmail_mcp_server.py"
+        #self.mcp_server_path = "D:\\Documents\\Curso_MCP\\seccion_7\\gmail_mcp_server.py"
+        self.mcp_server_path = "http://localhost:8000/mcp"
+        self.token = self._load_token()
+
+    def _load_token(self) -> str:
+        """Carga el token de auth"""
+        #token_file = "client_token.txt"
+        token_file = f'{self.user_id}_token.txt'
+        if os.path.exists(token_file):
+            with open(token_file, 'r') as f:
+                return f.read().strip()
+        return None
 
     async def _get_mcp_client(self):
         """Crea conexión con el servidor MCP"""
-        return Client(self.mcp_server_path)
+        if self.token:
+            return Client(self.mcp_server_path, auth=self.token)
+        else:
+            raise ValueError("No se encontró un token de auth válido.")
+        
+    def is_authenticated(self) -> bool:
+        return self.token is not None
+
+    #async def _get_mcp_client(self):
+    #    """Crea conexión con el servidor MCP"""
+    #    return Client(self.mcp_server_path)
     
     async def get_system_info(self) -> dict:
         """Información del sistema MCP"""
@@ -28,7 +50,8 @@ class GmailMCPClient:
                 "resources": [r.name for r in resources],
                 "templates": [t.name for t in templates],
                 "prompts": [p.name for p in prompts],
-                "server": self.mcp_server_path
+                "server": self.mcp_server_path,
+                "authenticated": True
             }
 
     async def get_tools_for_llm(self):
@@ -103,11 +126,17 @@ class GmailMCPClient:
             
             return resource_tools, resource_map
         
+    #async def get_prompt_messages(self, prompt_name: str, **kwargs) -> str:
+    #    """Obtiene el mensaje de un prompt especifico."""
+    #    async with await self._get_mcp_client() as cliente:
+    #        prompt = await cliente.get_prompt(prompt_name, arguments=kwargs)
+    #        return eval(prompt.messages[0].content.text)
+
     async def get_prompt_messages(self, prompt_name: str, **kwargs) -> str:
         """Obtiene el mensaje de un prompt especifico."""
         async with await self._get_mcp_client() as cliente:
             prompt = await cliente.get_prompt(prompt_name, arguments=kwargs)
-            return eval(prompt.messages[0].content.text)
+            return prompt.messages[0].content.text
         
     async def call_tool(self, tool_name: str, arguments: dict, client):
         """Ejecuta una herramienta MCP"""
