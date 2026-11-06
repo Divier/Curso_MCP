@@ -16,9 +16,11 @@ import os.path
 import pickle
 import json
 from pydantic import SecretStr
-import jwt
 from typing import Optional
+import jwt
+import logging
 
+logging.getLogger('asyncio').setLevel(logging.CRITICAL)
 
 # Configuración
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly', 
