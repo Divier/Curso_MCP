@@ -1,3 +1,5 @@
+# Llaves de Google OAuth: NUNCA subir. Ver README.md → Credenciales
 credentials.json
-token.pickle
-*.pickle
+token.json
+token*.pickle
+.env
